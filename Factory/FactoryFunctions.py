@@ -4,6 +4,7 @@ import subprocess
 import numpy as np
 import pandas as pd
 from time import strftime
+import PyInstaller.__main__
 
 
 def build_exe_version(script='',
@@ -177,27 +178,29 @@ def build_exe(py_script,
               icon=True,
               version=True):
 
-    dist_path = ' --distpath=' + os.getcwd() + r'\dist'
-    work_path = ' --workpath=' + os.getcwd() + r'\build'
-    command = 'pyinstaller ' + os.path.abspath(os.getcwd() + r'\Scripts\\' + py_script + '.py') + dist_path + work_path
+    command = []
+
+    # file to build
+    command.append(os.path.abspath(os.getcwd() + r'\Scripts\\' + py_script + '.py'))
+
+    # destination path
+    command.append('--distpath=' + os.getcwd() + r'\dist')
+
+    # working directory
+    command.append('--workpath=' + os.getcwd() + r'\build')
 
     if one_file:
-        command += ' --onefile'
+        command.append('--onefile')
     if no_console:
-        command += ' --noconsole'
+        command.append('--noconsole')
     if icon:
-        command += ' --icon=' + os.getcwd() + r'\icon.ico'
+        command.append('--icon=' + os.getcwd() + r'\icon.ico')
     if version:
-        command += ' --version-file=' + os.getcwd() + r'\version.txt'
-    command += ' --clean'
+        command.append('--version-file=' + os.getcwd() + r'\version.txt')
 
-    #try:
-    print(command)
-    subprocess.call(command)
+    command.append('--clean')
 
-    #except FileNotFoundError:
-    #    print('Could not run pyinstaller from the command prompt.')
-    #    quit()
+    PyInstaller.__main__.run(command)
 
 
 def move_build(script=''):
@@ -214,12 +217,17 @@ def move_build(script=''):
 
     if not os.path.exists(builds_folder):
         os.makedirs(builds_folder)
+
     os.makedirs(target_folder)
 
-    build_outputs = [r'\\build\\', r'\\dist', r'\\' + script + '.spec']
+    build_outputs = [r'\\build\\',
+                     r'\\dist']
 
     for Output in build_outputs:
         shutil.move(src=os.getcwd() + Output, dst=target_folder + Output)
+
+    shutil.move(src=os.getcwd() + r'\\Scripts\\' + script + '.spec',
+                dst=target_folder + script + '.spec')
 
     for file in os.listdir(target_folder + r'build\\' + script):
         source = target_folder + r'build\\' + script + r'\\' + file
