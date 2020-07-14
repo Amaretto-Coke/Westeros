@@ -181,28 +181,35 @@ def build_exe(script='',
     builds_folder = os.getcwd().replace("\\", r'\\') + r'\\' + 'Builds' + r'\\' + script
     target_folder = builds_folder + r'\\' + time + r'\\'
 
+    # Creates the Builds folder if it doesn't already exist
+    #  This will house all builds of all scripts
     if not os.path.exists(builds_folder):
         os.makedirs(builds_folder)
 
+    # Makes the folder that will contain the build and supporting files
     os.makedirs(target_folder)
 
-    build_outputs = [r'\\build\\',
-                     r'\\dist']
-
-    for Output in build_outputs:
+    # Moving the two temporary folders to the version folder
+    for Output in [r'\\build\\', r'\\dist']:
         shutil.move(src=os.getcwd() + Output, dst=target_folder + Output)
 
+    # Moving the spec file
     shutil.move(src=os.getcwd() + r'\\Scripts\\' + script + '.spec',
                 dst=target_folder + script + '.spec')
 
+    # Moving the temp files into the build folder
     for file in os.listdir(target_folder + r'build\\' + script):
         source = target_folder + r'build\\' + script + r'\\' + file
         shutil.move(src=source, dst=target_folder + r'build\\')
 
+    # Removes the empty build folder
     shutil.rmtree(target_folder + r'build\\' + script + r'\\')
-    source = target_folder + r'dist\\' + script + '.exe'
 
+    # Moves the exe file
+    source = target_folder + r'dist\\' + script + '.exe'
     shutil.move(src=source, dst=target_folder)
+
+    # Removes the empty dist folder
     shutil.rmtree(target_folder + r'dist\\')
 
     return target_folder + r'\\' + script + '.exe'
